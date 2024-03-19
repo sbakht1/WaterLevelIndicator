@@ -33,20 +33,7 @@ namespace WaterLevelIndicator.Controllers
         {
             if (ModelState.IsValid)
             {
-                //db.Database.ExecuteSqlCommand("UpdateWaterLevelDataByLabel @Label, @BoxID, @Measurement, @MeasurementDateTime",
-                // new SqlParameter("@Label", model.Label), 
-                // new SqlParameter("@BoxID", model.BoxID),
-                // new SqlParameter("@Measurement", model.Measurement),
-                // new SqlParameter("@MeasurementDateTime", model.MeasurementDateTime));
-
-                //db.Database.ExecuteSqlCommand("InsertWaterLevelDataReplica @BoxID, @Measurement, @MeasurementDateTime, @Label",
-                // new SqlParameter("@Label", model.Label),
-                // new SqlParameter("@BoxID", model.BoxID),
-                // new SqlParameter("@Measurement", model.Measurement),
-                // new SqlParameter("@MeasurementDateTime", model.MeasurementDateTime));
-
                 Session["CurrentBox"] = model.Label;
-
                 return Json(new { success = true });
             }
 

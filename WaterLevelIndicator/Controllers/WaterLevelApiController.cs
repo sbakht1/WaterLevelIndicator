@@ -89,22 +89,22 @@ namespace WaterLevelIndicator.Controllers
         {
             string smtpServer = "smtp.gmail.com";
             int smtpPort = 587; // Use 465 for SSL
-            string smtpUsername = "shahrozbakht@gmail.com";
-            string smtpPassword = "afot ulkj gvwl rqrs";
+            /*string smtpUsername = "Enter your username"*/
+            /*string smtpPassword = "generate an application-specific password in your Google account settings and paste here";*/
             const string subject = "Water Level Warning";
             const string body = "The water level has exceeded 5 meters. Please take necessary action.";
 
             using (SmtpClient smtpClient = new SmtpClient(smtpServer, smtpPort))
             {
-                smtpClient.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
+                //smtpClient.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
                 smtpClient.EnableSsl = true;
 
                 MailMessage mailMessage = new MailMessage
                 {
-                    From = new MailAddress("shahrozbakht@gmail.com"),
+                    /*  From = new MailAddress("Enter your email"), */
                 };
 
-                mailMessage.To.Add("shahrozbakht@gmail.com");
+                /*  mailMessage.To.Add("Enter sender email"); */
                 mailMessage.Subject = subject;
                 mailMessage.Body = body;
                 mailMessage.IsBodyHtml = true;
