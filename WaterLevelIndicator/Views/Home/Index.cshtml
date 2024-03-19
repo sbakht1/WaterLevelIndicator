@@ -1,0 +1,186 @@
+﻿@model List<WaterLevelIndicator.Models.ViewModels.WaterLevelViewModel>
+
+<link href="~/Styles/Home.css" rel="stylesheet" />
+<link rel="icon" type="image/png" href="~/images/watericon.png" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+<div class="ui search">
+    <div class="ui button" style="background-color: red; color: white; margin-left: -14px;" onclick="window.location.href='@Url.Action("Index", "WaterLevel")'">Back</div>
+    @*<div class="ui button" style="background-color: #126c2d; color: white; margin-left: -6px;" onclick="window.location.href='@Url.Action("Index", "WaterLevel")'">Display</div>*@
+    @*<div class="ui icon input" style="left: 52%;">
+          -  <input class="prompt" type="text" id="searchBox" placeholder="Search by Box Name">
+            <i class="search icon"></i>
+        </div>*@
+    <div class="results"></div>
+</div>
+
+<table id="dataTable">
+    <thead>
+        <tr>
+            <th>Station ID</th>
+            <th>Height</th>
+            <th>Recorded at</th>
+            <th>Station Label</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.BoxID</td>
+                    <td>@item.Measurement</td>
+                    <td>@item.MeasurementDateTime</td>
+                    <td>@item.Label</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<canvas id="waterLevelChart" width="750" height="400"></canvas>
+
+@foreach (var item in Model)
+{
+    <script>
+        var triggerStatus = '@item.TriggerStatus';
+
+        if (triggerStatus === 'High') {
+            Swal.fire({
+                title: 'Warning!',
+                text: 'Flood detected! A warning email has been sent.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+        } else if (triggerStatus === 'Low') {
+            Swal.fire({
+                title: 'Warning!',
+                text: 'Extreme drought detected!',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+        } else {
+            Swal.fire({
+                title: 'Do Nothing.',
+                text: 'Water Level is OK',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        }
+    </script>
+}
+
+<div id="timer" style="color: red;">
+    Next check in: <span id="countdown"></span>
+</div>
+
+
+
+
+
+<script>
+
+    function updateCountdown(seconds) {
+        var minutes = Math.floor(seconds / 60);
+        var remainingSeconds = seconds % 60;
+        document.getElementById('countdown').innerHTML = minutes + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds;
+    }
+
+    function startTimer(seconds) {
+        var timer = seconds;
+        updateCountdown(timer);
+        var countdownInterval = setInterval(function () {
+            timer--;
+            updateCountdown(timer);
+            if (timer <= 0) {
+                clearInterval(countdownInterval);
+                location.reload(true);
+            }
+        }, 1000); // Update every second
+    }
+
+    var refreshIntervalSeconds = Math.floor(Math.random() * (300 - 180)) + 180; // 3 to 5 minutes
+    startTimer(refreshIntervalSeconds);
+
+    // Digital clock
+    function updateClock() {
+        var now = new Date();
+        var hours = now.getHours();
+        var minutes = now.getMinutes();
+        var seconds = now.getSeconds();
+        var timeString = hours + ":" + (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+    }
+
+    // Update clock every second
+    setInterval(updateClock, 1000);
+
+
+    function fetchDataFromTable() {
+        var data = [];
+        document.querySelectorAll("#dataTable tbody tr").forEach(function (row) {
+            data.push({
+                Measurement: +row.querySelector("td:nth-child(2)").textContent,
+                MeasurementDateTime: new Date(row.querySelector("td:nth-child(3)").textContent)
+            });
+        });
+        return data;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Fetch data from the table
+        var data = [];
+        document.querySelectorAll("#dataTable tbody tr").forEach(function (row) {
+            data.push({
+                x: row.querySelector("td:nth-child(3)").textContent,
+                y: parseFloat(row.querySelector("td:nth-child(2)").textContent)
+            });
+        });
+
+        // Create the Chart.js line chart
+        var ctx = document.getElementById('waterLevelChart').getContext('2d');
+        var waterLevelChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(item => item.x),
+                datasets: [{
+                    label: 'Height',
+                    data: data.map(item => item.y),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)', // Add background color for fill effect
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Recorded At'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Height'
+                        },
+                        suggestedMin: 0, // Set minimum value for y-axis
+                        suggestedMax: 5 // Set maximum value for y-axis
+                    }
+                }
+            }
+        });
+    });
+
+
+</script>
